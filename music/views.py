@@ -3,6 +3,8 @@ from .models import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 
 class QoshiqApi(APIView):
     def get(self, request):
@@ -48,4 +50,30 @@ class AlbomApi(APIView):
         albom = Albom.objects.all()
         serializer = AlbomSerializer(albom, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class QoshiqchilarViewSet(ModelViewSet):
+    queryset = Qoshiqchi.objects.all()
+    serializer_class = QoshiqchiSerializer
+    @action(detail=True)
+    def albom(self, request, pk):
+        qoshiqchi = self.get_object()
+        albom = Albom.objects.filter(qoshiqchi=qoshiqchi)
+        serializer = AlbomSerializer(albom, many=True)
+        return Response(serializer.data)
+
+class AlbomViewset(ModelViewSet):
+    queryset = Albom.objects.all()
+    serializer_class = AlbomSerializer
+
+    @action(detail=True)
+    def qoshiq(self, request, pk):
+        albom = self.get_object()
+        qoshiq = Qoshiq.objects.filter(albom=albom)
+        serializer = QoshiqSerializer(qoshiq, many=True)
+        return Response(serializer.data)
+
+class QoshiqViewSet(ModelViewSet):
+    queryset = Qoshiq.objects.all()
+    serializer_class = QoshiqSerializer
+
 
