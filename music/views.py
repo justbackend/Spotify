@@ -5,16 +5,33 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
-
+# from rest_framework.pagination import PageNumberPagination
+from rest_framework import pagination
 class QoshiqApi(APIView):
     def get(self, request):
         qoshiq = Qoshiq.objects.all()
+        nom = request.query_params.get('name')
+        janr = request.query_params.get('janr')
+        if nom:
+            qoshiq = qoshiq.filter(nom__contains=nom)
+        if janr:
+            qoshiq = qoshiq.filter(janr__contains=janr)
+        qoshiq = qoshiq.order_by('davomiylik')
         serializer = QoshiqSerializer(qoshiq, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class QoshiqchiApi(APIView):
+
     def get(self, request):
         qoshiqchi = Qoshiqchi.objects.all()
+
+        qidiruv_soz = request.query_params.get('name')
+        davlat = request.query_params.get('davlat')
+        if qidiruv_soz:
+            qoshiqchi = Qoshiqchi.objects.filter(ism__contains=qidiruv_soz)
+        if davlat:
+            qoshiqchi = qoshiqchi.filter(davlat=davlat)
+        qoshiqchi = qoshiqchi.order_by('tugilgan_yil')
         serializer = QoshiqchiSerializer(qoshiqchi, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -48,6 +65,10 @@ class QoshiqchiOneApi(APIView):
 class AlbomApi(APIView):
     def get(self, request):
         albom = Albom.objects.all()
+        qidiruv_soz = request.query_params.get('name')
+        if qidiruv_soz:
+            albom = albom.filter(nom__contains=qidiruv_soz)
+        albom = albom.order_by('sana')
         serializer = AlbomSerializer(albom, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
